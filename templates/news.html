@@ -10,41 +10,65 @@
       .news-image {
         max-width: 100%;
         height: auto;
-        display: block; /* Prevent image from overflowing */
+        display: block;
         margin-bottom: 10px;
       }
       .news-details {
-        /* Style the meta-information */
         font-size: smaller;
         color: #777;
         margin-bottom: 10px;
+      }
+      .category-badge {
+        display: inline-block;
+        padding: 0.25em 0.6em;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border-radius: 0.25rem;
+        text-transform: capitalize;
+        margin-bottom: 0.5rem;
+      }
+      .category-natural_disasters {
+        background-color: #dc3545;
+        color: white;
+      }
+      .category-conflicts {
+        background-color: #ffc107;
+        color: black;
+      }
+      .category-humanitarian {
+        background-color: #28a745;
+        color: white;
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <h1>GDELT News</h1>
+      <h1 class="my-4">GDELT News</h1>
 
       <div class="row">
         {% for item in news_items %}
-        <div class="col-md-6">
-          <div class="news-item">
+        <div class="col-md-6 mb-4">
+          <div class="card">
             {% if item.socialimage %}
             <img
               src="{{ item.socialimage }}"
               alt="News Image"
-              class="news-image"
+              class="card-img-top"
             />
             {% endif %}
-
-            <h2>
-              <a href="{{ item.url }}" target="_blank">{{ item.title }}</a>
-            </h2>
-
-            <p class="news-details">
-              Date: {{ item.seendate }} | Source: {{ item.domain }} ({{
-              item.sourcecountry }}) | Language: {{ item.language }}
-            </p>
+            <div class="card-body">
+              <span class="category-badge category-{{ item.category }}">
+                {{ item.category.replace('_', ' ') }}
+              </span>
+              <h5 class="card-title">
+                <a href="{{ item.url }}" target="_blank">{{ item.title }}</a>
+              </h5>
+              <p class="news-details">
+                Date: {{ item.seendate }} <br />
+                Source: {{ item.domain }} ({{ item.sourcecountry }}) <br />
+                Language: {{ item.language }}
+              </p>
+            </div>
           </div>
         </div>
         {% endfor %}

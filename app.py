@@ -70,7 +70,11 @@ def fetch_data_for_category(category):
             print("*" * 25)
             print(f"Batch Processing {category}: {batch_keywords}")
             articles_df = get_gdelt_data(batch_keywords, themes)
+
             if not articles_df.empty:
+                # Add category column to the DataFrame
+                articles_df['category'] = category
+
                 print(f"Completed batch processing successfully for {
                       category}: {batch_keywords}")
                 all_results.append(articles_df)
@@ -93,6 +97,7 @@ def display_news():
     for category in KEYWORD_MAP:
         all_data[category] = fetch_data_for_category(category)
 
+    # Combine all DataFrames (they now include the category column)
     combined_df = pd.concat(all_data.values(), ignore_index=True)
 
     # Remove duplicate news items based on title (case-insensitive)
@@ -101,7 +106,7 @@ def display_news():
     combined_df['seendate'] = pd.to_datetime(
         combined_df['seendate'], format='%Y%m%dT%H%M%SZ', errors='coerce')
     combined_df = combined_df.sort_values(
-        by='seendate', ascending=False).fillna("N/A")  # Handle NaT
+        by='seendate', ascending=False).fillna("N/A")
 
     # Prepare data for the template
     news_items = []
@@ -114,18 +119,11 @@ def display_news():
             'socialimage': row['socialimage'],
             'domain': row['domain'],
             'language': row['language'],
-            'sourcecountry': row['sourcecountry']
+            'sourcecountry': row['sourcecountry'],
+            'category': row['category']  # Add category to news items
         })
 
     return render_template('news.html', news_items=news_items)
-
-
-def categorize_news(title):
-    for category, keywords in KEYWORD_MAP.items():
-        for keyword in keywords:
-            if keyword.lower() in title.lower():
-                return category
-    return "General"
 
 
 if __name__ == "__main__":
