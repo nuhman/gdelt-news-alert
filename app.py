@@ -15,30 +15,17 @@ FAILURE_PASS = 0
 
 # Keyword and Theme Mappings
 KEYWORD_MAP = {
-    'natural_disasters': [
-        'earthquake', 'flood', 'wildfire', 'hurricane', 'typhoon', 'cyclone',
-        'landslide', 'drought', 'tsunami', 'volcano', 'tornado', 'avalanche',
-        'storm surge', 'heatwave', 'blizzard', 'hailstorm', 'seismic activity',
-        'monsoon', 'natural disaster'
-    ],
-    'conflicts': [
-        'war', 'armed conflict', 'civil unrest', 'ethnic violence', 'sectarian violence',
-        'uprising', 'rebellion', 'insurgency', 'protest', 'riot', 'terrorism',
-        'militant attack', 'genocide', 'occupation', 'siege', 'revolution',
-        'guerilla warfare', 'border clash', 'ceasefire violation'
-    ],
-    'humanitarian': [
-        'refugee', 'displacement', 'famine', 'humanitarian crisis', 'epidemic',
-        'pandemic', 'cholera outbreak', 'malnutrition', 'aid shortage', 'humanitarian aid',
-        'relief efforts', 'asylum seekers', 'migration crisis', 'public health emergency', 'disease outbreak',
-        'medical emergency', 'starvation'
-    ]
+    'water_disaster': ['flood', 'flash flood', 'storm surge', 'tsunami', 'monsoon'],
+    'storm_disaster': ['hurricane', 'typhoon', 'cyclone', 'tornado', 'windstorm', 'sandstorm'],
+    'geological_diaster': ['earthquake', 'seismic activity', 'volcano', 'lava flow', 'landslide'],
+    'extreme_weather': ['drought', 'heatwave', 'blizzard', 'hailstorm', 'cold wave', 'wildfire'],
 }
 
 THEME_MAP = {
-    "natural_disasters": ["NATURAL_DISASTER", "NATURAL_DISASTER_EARTHQUAKE", "NATURAL_DISASTER_FLOOD", "NATURAL_DISASTER_HURRICANE"],
-    "conflicts": ["ARMEDCONFLICT", "BLOCKADE", "CEASEFIRE", "MILITARY", "PEACEKEEPING", "RELEASE_HOSTAGE", "SEIGE", "WB_2462_POLITICAL_VIOLENCE_AND_WAR"],
-    "humanitarian": ["DISPLACED", "AID_HUMANITARIAN", "EXILE", "REFUGEES", "UNREST_CHECKPOINT", "TAX_DISEASE_EPIDEMIC", "HEALTH_PANDEMIC"]
+    "water_disaster": ["NATURAL_DISASTER_FLOOD", "NATURAL_DISASTER_WIND_STORMS", "NATURAL_DISASTER_MONSOON", "NATURAL_DISASTER_TSUNAMI"],
+    "storm_disaster": ["NATURAL_DISASTER_HURRICANE", "NATURAL_DISASTER_TYPHOON", "NATURAL_DISASTER_CYCLONE", "NATURAL_DISASTER_TORNADO", "NATURAL_DISASTER_WINDSTORM"],
+    "geological_diaster": ["NATURAL_DISASTER_EARTHQUAKE", "NATURAL_DISASTER_VOLCANO", "NATURAL_DISASTER_LAVA", "NATURAL_DISASTER_LANDSLIDE"],
+    "extreme_weather": ["NATURAL_DISASTER_DROUGHT", "NATURAL_DISASTER_HEATWAVE", "NATURAL_DISASTER_BLIZZARD", "NATURAL_DISASTER_WILDFIRE"],    
 }
 
 

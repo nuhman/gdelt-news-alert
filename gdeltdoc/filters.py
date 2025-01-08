@@ -63,7 +63,7 @@ class Filters:
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
         timespan: Optional[str] = None,
-        num_records: int = 250,
+        num_records: int = 5,
         keyword: Optional[Filter] = None,
         domain: Optional[Filter] = None,
         domain_exact: Optional[Filter] = None,
@@ -141,6 +141,7 @@ class Filters:
         if keyword:
             self.query_params.append(self._keyword_to_string(keyword))
             self.query_params.append("sourcelang:english ")
+            self.query_params.append("tone<-5 ")
         if domain:
             self.query_params.append(self._filter_to_string("domain", domain))
 
