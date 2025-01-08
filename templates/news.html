@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>GDELT News</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <style>
+      .news-image {
+        max-width: 100%;
+        height: auto;
+        display: block; /* Prevent image from overflowing */
+        margin-bottom: 10px;
+      }
+      .news-details {
+        /* Style the meta-information */
+        font-size: smaller;
+        color: #777;
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>GDELT News</h1>
+
+      <div class="row">
+        {% for item in news_items %}
+        <div class="col-md-6">
+          <div class="news-item">
+            {% if item.socialimage %}
+            <img
+              src="{{ item.socialimage }}"
+              alt="News Image"
+              class="news-image"
+            />
+            {% endif %}
+
+            <h2>
+              <a href="{{ item.url }}" target="_blank">{{ item.title }}</a>
+            </h2>
+
+            <p class="news-details">
+              Date: {{ item.seendate }} | Source: {{ item.domain }} ({{
+              item.sourcecountry }}) | Language: {{ item.language }}
+            </p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </body>
+</html>

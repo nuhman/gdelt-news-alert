@@ -140,7 +140,7 @@ class Filters:
 
         if keyword:
             self.query_params.append(self._keyword_to_string(keyword))
-
+            self.query_params.append("sourcelang:english ")
         if domain:
             self.query_params.append(self._filter_to_string("domain", domain))
 
@@ -223,6 +223,9 @@ class Filters:
         """
         if type(keywords) == str:
             return f'"{keywords}" '
+
+        elif type(keywords) is list and len(keywords) == 1:
+            return f'"{keywords[0]}"'
 
         else:
             return (

@@ -149,11 +149,12 @@ class GdeltDoc:
             raise ValueError(f"Mode {mode} not in supported API modes")
 
         headers = {
-            "User-Agent": f"GDELT DOC Python API client {version} - https://github.com/alex9smith/gdelt-doc-api"
+            "User-Agent": f"GDELT DOC Python API client {version}"
         }
-
+        print(f"https://api.gdeltproject.org/api/v2/doc/doc?query={query_string} &mode={mode}&format=json&sort=DateDesc")
+        print("*"*20)
         response = requests.get(
-            f"https://api.gdeltproject.org/api/v2/doc/doc?query={query_string}&mode={mode}&format=json",
+            f"https://api.gdeltproject.org/api/v2/doc/doc?query={query_string} &mode={mode}&format=json&sort=DateDesc",
             headers=headers
         )
 
