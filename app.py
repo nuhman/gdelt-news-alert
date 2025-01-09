@@ -80,6 +80,10 @@ def fetch_data_for_category(category):
 
 @app.route("/")
 def display_news():
+    return render_template('news.html')
+
+@app.route("/get_news")
+def get_news():
     all_data = {}
     for category in KEYWORD_MAP:
         all_data[category] = fetch_data_for_category(category)
@@ -110,7 +114,7 @@ def display_news():
             'category': row['category']  # Add category to news items
         })
 
-    return render_template('news.html', news_items=news_items)
+    return Response(json.dumps(news_items), mimetype='application/json')
 
 
 if __name__ == "__main__":

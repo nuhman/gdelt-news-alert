@@ -27,25 +27,45 @@
         text-transform: capitalize;
         margin-bottom: 0.5rem;
       }
-      .category-natural_disasters {
-        background-color: #dc3545;
+      .category-water_disaster {
+        background-color: #1a65d6;
         color: white;
       }
-      .category-conflicts {
+      .category-storm_disaster {
         background-color: #ffc107;
         color: black;
       }
-      .category-humanitarian {
+      .category-geological_diaster {
         background-color: #28a745;
         color: white;
+      }
+
+      .category-extreme_weather {
+        background-color: #24e4da;
+        color: white;
+      }
+
+      #loader {
+        text-align: center;
+        padding: 20px;
+      }
+      .spinner-border {
+        width: 3rem;
+        height: 3rem;
       }
     </style>
   </head>
   <body>
     <div class="container">
       <h1 class="my-4">GDELT News</h1>
-
-      <div class="row">
+      <!-- Add loader -->
+      <div id="loader">
+        <div class="spinner-border text-primary" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+        <p class="mt-2">Fetching latest news...</p>
+      </div>
+      <div class="row" id="news-container">
         {% for item in news_items %}
         <div class="col-md-6 mb-4">
           <div class="card">
@@ -76,5 +96,53 @@
     </div>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+      // Function to render a single news item
+      function renderNewsItem(item) {
+        return `
+            <div class="col-md-6 mb-4">
+              <div class="card">
+                ${
+                  item.socialimage
+                    ? `<img src="${item.socialimage}" alt="News Image" class="card-img-top"/>`
+                    : ""
+                }
+                <div class="card-body">
+                  <span class="category-badge category-${item.category}">
+                    ${item.category.replace("_", " ")}
+                  </span>
+                  <h5 class="card-title">
+                    <a href="${item.url}" target="_blank">${item.title}</a>
+                  </h5>
+                  <p class="news-details">
+                    Date: ${item.seendate} <br>
+                    Source: ${item.domain} (${item.sourcecountry}) <br>
+                    Language: ${item.language}
+                  </p>
+                </div>
+              </div>
+            </div>
+          `;
+      }
+
+      // Fetch news data
+      $(document).ready(function () {
+        fetch("/get_news")
+          .then((response) => response.json())
+          .then((data) => {
+            $("#loader").hide();
+            const newsContainer = $("#news-container");
+            data.forEach((item) => {
+              newsContainer.append(renderNewsItem(item));
+            });
+          })
+          .catch((error) => {
+            $("#loader").html(
+              '<p class="text-danger">Error loading news. Please refresh the page.</p>'
+            );
+            console.error("Error:", error);
+          });
+      });
+    </script>
   </body>
 </html>
