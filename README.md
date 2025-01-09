@@ -1,4 +1,4 @@
-# Disaster Alert Monitor  
+# Disaster Alert Monitor   
 
 A Flask-based web application that monitors and visualizes real-time disaster alerts using the [GDELT 2.0 Doc API](https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/).  
 The application aggregates and categorizes natural disaster news to support immediate humanitarian response efforts.  
