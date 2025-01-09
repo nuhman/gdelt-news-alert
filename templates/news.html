@@ -53,11 +53,100 @@
         width: 3rem;
         height: 3rem;
       }
+      .spin {
+        display: inline-block;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
     </style>
   </head>
   <body>
     <div class="container">
       <h1 class="my-4">GDELT News</h1>
+      <button id="refresh-btn" class="btn btn-outline-secondary mb-4">
+        <span id="refresh-icon">🔄</span> Refresh News
+      </button>
+      <div class="row mb-4">
+        <div class="col-md-3">
+          <div class="card text-white bg-primary">
+            <div class="card-body">
+              <h5 class="card-title">Water Disasters</h5>
+              <p class="card-text h2" id="water-count">0</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-dark bg-warning">
+            <div class="card-body">
+              <h5 class="card-title">Storm Events</h5>
+              <p class="card-text h2" id="storm-count">0</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-white bg-success">
+            <div class="card-body">
+              <h5 class="card-title">Geological Events</h5>
+              <p class="card-text h2" id="geological-count">0</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-white bg-info">
+            <div class="card-body">
+              <h5 class="card-title">Extreme Weather</h5>
+              <p class="card-text h2" id="extreme-count">0</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mb-4">
+        <div class="btn-group" role="group">
+          <button
+            type="button"
+            class="btn btn-outline-primary active"
+            data-filter="all"
+          >
+            All
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline-primary"
+            data-filter="water_disaster"
+          >
+            Water
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline-primary"
+            data-filter="storm_disaster"
+          >
+            Storm
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline-primary"
+            data-filter="geological_diaster"
+          >
+            Geological
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline-primary"
+            data-filter="extreme_weather"
+          >
+            Extreme Weather
+          </button>
+        </div>
+      </div>
       <!-- Add loader -->
       <div id="loader">
         <div class="spinner-border text-primary" role="status">
@@ -143,6 +232,93 @@
               '<p class="text-danger">Error loading news. Please refresh the page.</p>'
             );
             console.error("Error:", error);
+          });
+      });
+
+      $(document).ready(function () {
+        // Filter functionality
+        $(".btn-group .btn").click(function () {
+          $(".btn-group .btn").removeClass("active");
+          $(this).addClass("active");
+
+          const filter = $(this).data("filter");
+          if (filter === "all") {
+            $(".col-md-6").show();
+          } else {
+            $(".col-md-6").hide();
+            $(`.col-md-6:has(.category-${filter})`).show();
+          }
+        });
+      });
+
+      function updateStatistics(data) {
+        const counts = {
+          water_disaster: 0,
+          storm_disaster: 0,
+          geological_diaster: 0,
+          extreme_weather: 0,
+        };
+
+        data.forEach((item) => {
+          counts[item.category]++;
+        });
+
+        $("#water-count").text(counts.water_disaster);
+        $("#storm-count").text(counts.storm_disaster);
+        $("#geological-count").text(counts.geological_diaster);
+        $("#extreme-count").text(counts.extreme_weather);
+      }
+
+      // Modify your existing fetch call
+      fetch("/get_news")
+        .then((response) => response.json())
+        .then((data) => {
+          $("#loader").hide();
+          const newsContainer = $("#news-container");
+          data.forEach((item) => {
+            newsContainer.append(renderNewsItem(item));
+          });
+          updateStatistics(data); // Add this line
+        })
+        .catch((error) => {
+          $("#loader").html(
+            '<p class="text-danger">Error loading news. Please refresh the page.</p>'
+          );
+          console.error("Error:", error);
+        });
+
+      $("#refresh-btn").click(function () {
+        const btn = $(this);
+        const icon = $("#refresh-icon");
+
+        // Disable button and show loading state
+        btn.prop("disabled", true);
+        icon.addClass("spin");
+
+        // Clear current news
+        $("#news-container").empty();
+        $("#loader").show();
+
+        // Fetch fresh news
+        fetch("/get_news")
+          .then((response) => response.json())
+          .then((data) => {
+            $("#loader").hide();
+            const newsContainer = $("#news-container");
+            data.forEach((item) => {
+              newsContainer.append(renderNewsItem(item));
+            });
+            updateStatistics(data);
+          })
+          .catch((error) => {
+            $("#loader").html(
+              '<p class="text-danger">Error loading news. Please refresh the page.</p>'
+            );
+            console.error("Error:", error);
+          })
+          .finally(() => {
+            btn.prop("disabled", false);
+            icon.removeClass("spin");
           });
       });
     </script>
