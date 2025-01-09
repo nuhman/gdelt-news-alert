@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Article Summary</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <style>
+      .article-content {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .article-image {
+        max-width: 100%;
+        height: auto;
+        margin-bottom: 20px;
+      }
+      .summary-section {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+      }
+      .metadata {
+        color: #6c757d;
+        font-size: 0.9em;
+        margin-bottom: 20px;
+      }
+      .keyword-badge {
+        margin-right: 5px;
+        margin-bottom: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container article-content">
+      <nav class="mb-4">
+        <a href="/" class="btn btn-outline-primary">&larr; Back to News</a>
+      </nav>
+
+      {% if article.top_image %}
+      <img
+        src="{{ article.top_image }}"
+        alt="Article Image"
+        class="article-image"
+      />
+      {% endif %}
+
+      <h1 class="mb-4">{{ article.title }}</h1>
+
+      <div class="metadata">
+        {% if article.authors %}
+        <div>By {{ article.authors|join(', ') }}</div>
+        {% endif %} {% if article.publish_date %}
+        <div>Published on {{ article.publish_date }}</div>
+        {% endif %}
+      </div>
+
+      <div class="summary-section">
+        <h3>Summary</h3>
+        {% if article.ai_summary %}
+        <p>{{ article.ai_summary }}</p>
+        {% else %}
+        <p>{{ article.summary }}</p>
+        {% endif %}
+      </div>
+
+      {% if article.keywords %}
+      <div class="mb-4">
+        <h4>Keywords</h4>
+        {% for keyword in article.keywords %}
+        <span class="badge badge-secondary keyword-badge">{{ keyword }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="full-article">
+        <h4>Full Article</h4>
+        {{ article.text|replace('\n', '<br />')|safe }}
+      </div>
+    </div>
+  </body>
+</html>

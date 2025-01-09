@@ -101,28 +101,30 @@
       function renderNewsItem(item) {
         return `
             <div class="col-md-6 mb-4">
-              <div class="card">
+            <div class="card">
                 ${
                   item.socialimage
                     ? `<img src="${item.socialimage}" alt="News Image" class="card-img-top"/>`
                     : ""
                 }
                 <div class="card-body">
-                  <span class="category-badge category-${item.category}">
+                <span class="category-badge category-${item.category}">
                     ${item.category.replace("_", " ")}
-                  </span>
-                  <h5 class="card-title">
-                    <a href="${item.url}" target="_blank">${item.title}</a>
-                  </h5>
-                  <p class="news-details">
+                </span>
+                <h5 class="card-title">
+                    <a href="/article/${encodeURIComponent(
+                      item.url
+                    )}" class="article-link">${item.title}</a>
+                </h5>
+                <p class="news-details">
                     Date: ${item.seendate} <br>
                     Source: ${item.domain} (${item.sourcecountry}) <br>
                     Language: ${item.language}
-                  </p>
+                </p>
                 </div>
-              </div>
             </div>
-          `;
+            </div>
+        `;
       }
 
       // Fetch news data

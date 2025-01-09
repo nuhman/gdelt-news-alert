@@ -1,8 +1,16 @@
 from gdeltdoc import GdeltDoc, Filters
 import pandas as pd
 import time
-from flask import Flask, render_template, Response
+from flask import Flask, render_template, Response, jsonify
 import json
+from sumy.parsers.plaintext import PlaintextParser
+from sumy.nlp.tokenizers import Tokenizer
+from sumy.summarizers.lsa import LsaSummarizer
+from sumy.nlp.stemmers import Stemmer
+from sumy.utils import get_stop_words
+import traceback
+import nltk
+from newspaper import Article
 
 app = Flask(__name__)
 
@@ -25,8 +33,90 @@ THEME_MAP = {
     "water_disaster": ["NATURAL_DISASTER_FLOOD", "NATURAL_DISASTER_WIND_STORMS", "NATURAL_DISASTER_MONSOON", "NATURAL_DISASTER_TSUNAMI"],
     "storm_disaster": ["NATURAL_DISASTER_HURRICANE", "NATURAL_DISASTER_TYPHOON", "NATURAL_DISASTER_CYCLONE", "NATURAL_DISASTER_TORNADO", "NATURAL_DISASTER_WINDSTORM"],
     "geological_diaster": ["NATURAL_DISASTER_EARTHQUAKE", "NATURAL_DISASTER_VOLCANO", "NATURAL_DISASTER_LAVA", "NATURAL_DISASTER_LANDSLIDE"],
-    "extreme_weather": ["NATURAL_DISASTER_DROUGHT", "NATURAL_DISASTER_HEATWAVE", "NATURAL_DISASTER_BLIZZARD", "NATURAL_DISASTER_WILDFIRE"],    
+    "extreme_weather": ["NATURAL_DISASTER_DROUGHT", "NATURAL_DISASTER_HEATWAVE", "NATURAL_DISASTER_BLIZZARD", "NATURAL_DISASTER_WILDFIRE"],
 }
+
+
+# Download required NLTK data
+try:
+    print("Init NLTK!")
+    nltk.download('punkt')
+    nltk.download('averaged_perceptron_tagger')
+    nltk.download('punkt_tab')
+except Exception as e:
+    print(f"Error downloading NLTK data: {str(e)}")
+
+
+class ArticleProcessor:
+    def __init__(self):
+        # Initialize the summarizer
+        self.stemmer = Stemmer('english')
+        self.summarizer = LsaSummarizer(self.stemmer)
+        self.summarizer.stop_words = get_stop_words('english')
+
+    def fetch_article(self, url):
+        try:
+            print("Trying to fetch article")
+            # Download and parse article
+            article = Article(url)
+            article.download()
+            print("Article downloaded.. Now parsing.. ")
+            article.parse()
+
+            # Get article text and create summary
+            text = article.text
+            if not text:
+                return {
+                    'title': article.title,
+                    'text': "Could not extract article text.",
+                    'summary': "Article text extraction failed.",
+                    'authors': article.authors,
+                    'publish_date': article.publish_date.strftime('%Y-%m-%d') if article.publish_date else None,
+                    'top_image': article.top_image
+                }
+
+            summary = self.get_summary(text)
+
+            return {
+                'title': article.title,
+                'text': text,
+                'summary': summary,
+                'authors': article.authors,
+                'publish_date': article.publish_date.strftime('%Y-%m-%d') if article.publish_date else None,
+                'top_image': article.top_image
+            }
+        except Exception as e:
+            print(f"Error processing article: {str(e)}")
+            print(traceback.format_exc())
+            return None
+
+    def get_summary(self, text, sentences_count=5):
+        try:
+            print(text)
+            # Check if text is empty or too short
+            if not text or len(text.split()) < 10:
+                return "Text is too short to summarize."
+
+            # Create parser
+            parser = PlaintextParser.from_string(text, Tokenizer('english'))
+
+            # Generate summary
+            summary_sentences = self.summarizer(
+                parser.document, sentences_count)
+
+            # Join sentences into a paragraph
+            summary = ' '.join([str(sentence)
+                               for sentence in summary_sentences])
+
+            # If summary is empty, return first few sentences of text
+            if not summary:
+                sentences = text.split('.')[:sentences_count]
+                summary = '. '.join(sentences) + '@!'
+
+            return summary
+        except Exception as e:
+            print(f"Error getting summary: {str(e)}")
+            return "Unable to generate summary. Using fallback method: " + '. '.join(text.split('.')[:3]) + '.'
 
 
 def get_gdelt_data(keywords, theme):
@@ -82,6 +172,7 @@ def fetch_data_for_category(category):
 def display_news():
     return render_template('news.html')
 
+
 @app.route("/get_news")
 def get_news():
     all_data = {}
@@ -115,6 +206,17 @@ def get_news():
         })
 
     return Response(json.dumps(news_items), mimetype='application/json')
+
+
+@app.route("/article/<path:url>")
+def get_article_summary(url):
+    processor = ArticleProcessor()
+    article_data = processor.fetch_article(url)
+
+    if article_data:
+        return render_template('article.html', article=article_data)
+    else:
+        return jsonify({'error': 'Failed to fetch article'}), 404
 
 
 if __name__ == "__main__":
