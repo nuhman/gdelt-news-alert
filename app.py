@@ -13,6 +13,7 @@ import nltk
 from newspaper import Article, ArticleException
 from newspaper.configuration import Configuration
 import requests.exceptions
+import os
 
 app = Flask(__name__)
 
@@ -184,7 +185,7 @@ def fetch_data_for_category(category):
             if not articles_df.empty:
                 # Add category column to the DataFrame
                 articles_df['category'] = category
-                
+
                 all_results.append(articles_df)
                 global SUCCESS_PASS
                 SUCCESS_PASS += 1
@@ -256,4 +257,5 @@ def get_article_summary(url):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 10000))
+    app.run(host='0.0.0.0', port=port)
