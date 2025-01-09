@@ -3,43 +3,160 @@
   <head>
     <title>Article Summary</title>
     <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap"
+      rel="stylesheet"
     />
     <style>
-      .article-content {
+      :root {
+        --primary-bg: #f8f9fa;
+        --card-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+        --transition-speed: 0.25s;
+        --border-radius: 12px;
+        --header-height: 70px;
+      }
+
+      body {
+        background-color: var(--primary-bg);
+        color: #1a1a1a;
+        line-height: 1.6;
+        font-family: "Nunito", serif;
+        font-optical-sizing: auto;
+        font-style: normal;
+      }
+
+      .navbar {
+        height: var(--header-height);
+        backdrop-filter: blur(20px);
+        background: rgba(255, 255, 255, 0.85);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+      }
+
+      .navbar-brand {
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        background: linear-gradient(45deg, #1a1a1a, #4a4a4a);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .back-btn {
+        border-radius: 30px;
+        padding: 8px 20px;
+        transition: all var(--transition-speed);
+        background: #1a1a1a;
+        border: none;
+        color: white;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+      }
+
+      .back-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        color: white;
+      }
+
+      .article-container {
         max-width: 800px;
         margin: 0 auto;
-        padding: 20px;
+        padding: 0 24px;
       }
+
       .article-image {
-        max-width: 100%;
-        height: auto;
-        margin-bottom: 20px;
+        width: 100%;
+        height: 400px;
+        object-fit: cover;
+        border-radius: var(--border-radius);
+        margin-bottom: 2rem;
+        box-shadow: var(--card-shadow);
       }
-      .summary-section {
-        background-color: #f8f9fa;
-        padding: 20px;
-        border-radius: 5px;
-        margin-bottom: 20px;
+
+      .article-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        margin-bottom: 1.5rem;
+        line-height: 1.2;
       }
+
       .metadata {
-        color: #6c757d;
-        font-size: 0.9em;
-        margin-bottom: 20px;
+        background: rgba(0, 0, 0, 0.03);
+        padding: 16px 24px;
+        border-radius: var(--border-radius);
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
       }
+
+      .summary-card {
+        background: white;
+        padding: 24px;
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+        margin-bottom: 2rem;
+      }
+
+      .summary-card h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #1a1a1a;
+      }
+
       .keyword-badge {
-        margin-right: 5px;
-        margin-bottom: 5px;
+        background: rgba(0, 0, 0, 0.05);
+        color: #1a1a1a;
+        border-radius: 30px;
+        padding: 6px 12px;
+        margin-right: 8px;
+        margin-bottom: 8px;
+        display: inline-block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all var(--transition-speed);
+      }
+
+      .keyword-badge:hover {
+        background: rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+      }
+
+      .full-article {
+        background: white;
+        padding: 32px;
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+        margin-bottom: 3rem;
+        line-height: 1.8;
+      }
+
+      .full-article h4 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: #1a1a1a;
       }
     </style>
   </head>
   <body>
-    <div class="container article-content">
-      <nav class="mb-4">
-        <a href="/" class="btn btn-outline-primary">&larr; Back to News</a>
-      </nav>
+    <nav class="navbar sticky-top">
+      <div class="container">
+        <h1 class="navbar-brand mb-0 h1 fs-2">GlobalAlert</h1>
+        <a href="/" class="back-btn"> ←&nbsp; Back to News </a>
+      </div>
+    </nav>
 
+    <div class="article-container">
       {% if article.top_image %}
       <img
         src="{{ article.top_image }}"
@@ -48,17 +165,17 @@
       />
       {% endif %}
 
-      <h1 class="mb-4">{{ article.title }}</h1>
+      <h1 class="article-title">{{ article.title }}</h1>
 
       <div class="metadata">
         {% if article.authors %}
-        <div>By {{ article.authors|join(', ') }}</div>
+        <div class="mb-2">By {{ article.authors|join(', ') }}</div>
         {% endif %} {% if article.publish_date %}
         <div>Published on {{ article.publish_date }}</div>
         {% endif %}
       </div>
 
-      <div class="summary-section">
+      <div class="summary-card">
         <h3>Summary</h3>
         {% if article.ai_summary %}
         <p>{{ article.ai_summary }}</p>
@@ -71,7 +188,7 @@
       <div class="mb-4">
         <h4>Keywords</h4>
         {% for keyword in article.keywords %}
-        <span class="badge badge-secondary keyword-badge">{{ keyword }}</span>
+        <span class="keyword-badge">{{ keyword }}</span>
         {% endfor %}
       </div>
       {% endif %}
