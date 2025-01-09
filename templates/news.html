@@ -71,6 +71,9 @@
   <body>
     <div class="container">
       <h1 class="my-4">GDELT News</h1>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <small id="last-updated" class="text-muted"></small>
+      </div>
       <button id="refresh-btn" class="btn btn-outline-secondary mb-4">
         <span id="refresh-icon">🔄</span> Refresh News
       </button>
@@ -186,71 +189,134 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-      // Function to render a single news item
-      function renderNewsItem(item) {
-        return `
-            <div class="col-md-6 mb-4">
-            <div class="card">
-                ${
-                  item.socialimage
-                    ? `<img src="${item.socialimage}" alt="News Image" class="card-img-top"/>`
-                    : ""
-                }
-                <div class="card-body">
-                <span class="category-badge category-${item.category}">
-                    ${item.category.replace("_", " ")}
-                </span>
-                <h5 class="card-title">
-                    <a href="/article/${encodeURIComponent(
-                      item.url
-                    )}" class="article-link">${item.title}</a>
-                </h5>
-                <p class="news-details">
-                    Date: ${item.seendate} <br>
-                    Source: ${item.domain} (${item.sourcecountry}) <br>
-                    Language: ${item.language}
-                </p>
-                </div>
-            </div>
-            </div>
-        `;
+      const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+      // Cache management functions
+      function getCachedNews() {
+        const cached = localStorage.getItem("newsCache");
+        if (!cached) return null;
+
+        const { timestamp, data } = JSON.parse(cached);
+        const now = new Date().getTime();
+
+        if (now - timestamp < CACHE_DURATION) {
+          return { timestamp, data };
+        }
+
+        localStorage.removeItem("newsCache");
+        return null;
       }
 
-      // Fetch news data
-      $(document).ready(function () {
+      function cacheNews(data) {
+        const cacheData = {
+          timestamp: new Date().getTime(),
+          data: data,
+        };
+        localStorage.setItem("newsCache", JSON.stringify(cacheData));
+      }
+
+      // Function to render a single news item (keep your existing function)
+      function renderNewsItem(item) {
+        return `
+      <div class="col-md-6 mb-4">
+        <div class="card">
+          ${
+            item.socialimage
+              ? `<img src="${item.socialimage}" alt="News Image" class="card-img-top"/>`
+              : ""
+          }
+          <div class="card-body">
+            <span class="category-badge category-${item.category}">
+              ${item.category.replace("_", " ")}
+            </span>
+            <h5 class="card-title">
+              <a href="/article/${encodeURIComponent(
+                item.url
+              )}" class="article-link">${item.title}</a>
+            </h5>
+            <p class="news-details">
+              Date: ${item.seendate} <br>
+              Source: ${item.domain} (${item.sourcecountry}) <br>
+              Language: ${item.language}
+            </p>
+          </div>
+        </div>
+      </div>
+    `;
+      }
+
+      // Modified function to load and display news
+      function loadNews(forceRefresh = false) {
+        const cachedData = !forceRefresh && getCachedNews();
+
+        if (cachedData) {
+          $("#loader").hide();
+          displayNewsData(cachedData.data);
+          return;
+        }
+
+        $("#news-container").empty();
+        $("#loader").show();
+
+        if (forceRefresh) {
+          const btn = $("#refresh-btn");
+          const icon = $("#refresh-icon");
+          btn.prop("disabled", true);
+          icon.addClass("spin");
+        }
+
         fetch("/get_news")
           .then((response) => response.json())
           .then((data) => {
             $("#loader").hide();
-            const newsContainer = $("#news-container");
-            data.forEach((item) => {
-              newsContainer.append(renderNewsItem(item));
-            });
+            cacheNews(data);
+            displayNewsData(data);
           })
           .catch((error) => {
             $("#loader").html(
               '<p class="text-danger">Error loading news. Please refresh the page.</p>'
             );
             console.error("Error:", error);
+          })
+          .finally(() => {
+            if (forceRefresh) {
+              $("#refresh-btn").prop("disabled", false);
+              $("#refresh-icon").removeClass("spin");
+            }
           });
-      });
+      }
 
-      $(document).ready(function () {
-        // Filter functionality
-        $(".btn-group .btn").click(function () {
-          $(".btn-group .btn").removeClass("active");
-          $(this).addClass("active");
+      function updateTimestamp(timestamp) {
+        const date = timestamp ? new Date(timestamp) : new Date();
+        const formattedTime = date.toLocaleTimeString();
+        const formattedDate = date.toLocaleDateString();
+        $("#last-updated").text(
+          `Last updated: ${formattedDate} ${formattedTime}`
+        );
+      }
 
-          const filter = $(this).data("filter");
-          if (filter === "all") {
-            $(".col-md-6").show();
-          } else {
-            $(".col-md-6").hide();
-            $(`.col-md-6:has(.category-${filter})`).show();
-          }
+      // Function to display news data
+      function displayNewsData(data) {
+        const newsContainer = $("#news-container");
+        newsContainer.empty();
+        data.forEach((item) => {
+          newsContainer.append(renderNewsItem(item));
         });
-      });
+        updateStatistics(data);
 
+        // Update timestamp from cache or current time
+        const cached = getCachedNews();
+        updateTimestamp(cached ? cached.timestamp : null);
+
+        // Reapply current filter if any
+        const activeFilter = $(".btn-group .btn.active").data("filter");
+        if (activeFilter && activeFilter !== "all") {
+          $(".col-md-6").hide();
+          $(`.col-md-6:has(.category-${activeFilter})`).show();
+        }
+      }
+
+      // Keep your existing updateStatistics function
       function updateStatistics(data) {
         const counts = {
           water_disaster: 0,
@@ -269,57 +335,29 @@
         $("#extreme-count").text(counts.extreme_weather);
       }
 
-      // Modify your existing fetch call
-      fetch("/get_news")
-        .then((response) => response.json())
-        .then((data) => {
-          $("#loader").hide();
-          const newsContainer = $("#news-container");
-          data.forEach((item) => {
-            newsContainer.append(renderNewsItem(item));
-          });
-          updateStatistics(data); // Add this line
-        })
-        .catch((error) => {
-          $("#loader").html(
-            '<p class="text-danger">Error loading news. Please refresh the page.</p>'
-          );
-          console.error("Error:", error);
+      // Document ready handlers
+      $(document).ready(function () {
+        // Initial load using cache if available
+        loadNews();
+
+        // Filter functionality
+        $(".btn-group .btn").click(function () {
+          $(".btn-group .btn").removeClass("active");
+          $(this).addClass("active");
+
+          const filter = $(this).data("filter");
+          if (filter === "all") {
+            $(".col-md-6").show();
+          } else {
+            $(".col-md-6").hide();
+            $(`.col-md-6:has(.category-${filter})`).show();
+          }
         });
 
-      $("#refresh-btn").click(function () {
-        const btn = $(this);
-        const icon = $("#refresh-icon");
-
-        // Disable button and show loading state
-        btn.prop("disabled", true);
-        icon.addClass("spin");
-
-        // Clear current news
-        $("#news-container").empty();
-        $("#loader").show();
-
-        // Fetch fresh news
-        fetch("/get_news")
-          .then((response) => response.json())
-          .then((data) => {
-            $("#loader").hide();
-            const newsContainer = $("#news-container");
-            data.forEach((item) => {
-              newsContainer.append(renderNewsItem(item));
-            });
-            updateStatistics(data);
-          })
-          .catch((error) => {
-            $("#loader").html(
-              '<p class="text-danger">Error loading news. Please refresh the page.</p>'
-            );
-            console.error("Error:", error);
-          })
-          .finally(() => {
-            btn.prop("disabled", false);
-            icon.removeClass("spin");
-          });
+        // Refresh button handler
+        $("#refresh-btn").click(function () {
+          loadNews(true); // Force refresh
+        });
       });
     </script>
   </body>
