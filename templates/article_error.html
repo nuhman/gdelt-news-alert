@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Article Not Available</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <style>
+      .error-container {
+        max-width: 600px;
+        margin: 50px auto;
+        padding: 20px;
+        text-align: center;
+      }
+      .error-icon {
+        font-size: 48px;
+        color: #dc3545;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="error-container">
+        <div class="error-icon">⚠️</div>
+        <h2 class="mb-4">Unable to Load Article</h2>
+
+        <div class="alert alert-danger">{{ error_message }}</div>
+
+        <div class="mt-4">
+          <p>You can try:</p>
+          <ul class="list-unstyled">
+            <li>
+              <a
+                href="{{ url }}"
+                target="_blank"
+                class="btn btn-outline-primary mb-2"
+                >Visit Original Article</a
+              >
+            </li>
+            <li>
+              <a href="/" class="btn btn-outline-secondary"
+                >Return to News Feed</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

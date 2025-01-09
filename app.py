@@ -10,7 +10,9 @@ from sumy.nlp.stemmers import Stemmer
 from sumy.utils import get_stop_words
 import traceback
 import nltk
-from newspaper import Article
+from newspaper import Article, ArticleException
+from newspaper.configuration import Configuration
+import requests.exceptions
 
 app = Flask(__name__)
 
@@ -49,6 +51,12 @@ except Exception as e:
 
 class ArticleProcessor:
     def __init__(self):
+        # Configure newspaper with custom settings
+        self.config = Configuration()
+        self.config.browser_user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        self.config.request_timeout = 10  # Reduced timeout
+        self.config.number_threads = 1
+
         # Initialize the summarizer
         self.stemmer = Stemmer('english')
         self.summarizer = LsaSummarizer(self.stemmer)
@@ -58,7 +66,7 @@ class ArticleProcessor:
         try:
             print("Trying to fetch article")
             # Download and parse article
-            article = Article(url)
+            article = Article(url, config=self.config)
             article.download()
             print("Article downloaded.. Now parsing.. ")
             article.parse()
@@ -67,28 +75,54 @@ class ArticleProcessor:
             text = article.text
             if not text:
                 return {
-                    'title': article.title,
-                    'text': "Could not extract article text.",
-                    'summary': "Article text extraction failed.",
-                    'authors': article.authors,
-                    'publish_date': article.publish_date.strftime('%Y-%m-%d') if article.publish_date else None,
-                    'top_image': article.top_image
+                    'error': True,
+                    'message': 'No article content found',
+                    'title': article.title or 'Article Not Available',
+                    'url': url
                 }
 
             summary = self.get_summary(text)
 
             return {
+                'error': False,
                 'title': article.title,
                 'text': text,
                 'summary': summary,
                 'authors': article.authors,
                 'publish_date': article.publish_date.strftime('%Y-%m-%d') if article.publish_date else None,
-                'top_image': article.top_image
+                'top_image': article.top_image,
+                'url': url
+            }
+        except ArticleException as e:
+            print(f"Article extraction error: {str(e)}")
+            return {
+                'error': True,
+                'message': 'Unable to extract article content',
+                'details': str(e),
+                'url': url
+            }
+        except requests.exceptions.Timeout:
+            print(f"Timeout error for URL: {url}")
+            return {
+                'error': True,
+                'message': 'The article website took too long to respond',
+                'url': url
+            }
+        except requests.exceptions.RequestException as e:
+            print(f"Request error: {str(e)}")
+            return {
+                'error': True,
+                'message': 'Unable to access the article website',
+                'url': url
             }
         except Exception as e:
-            print(f"Error processing article: {str(e)}")
+            print(f"Unexpected error: {str(e)}")
             print(traceback.format_exc())
-            return None
+            return {
+                'error': True,
+                'message': 'An unexpected error occurred',
+                'url': url
+            }
 
     def get_summary(self, text, sentences_count=5):
         try:
@@ -213,10 +247,15 @@ def get_article_summary(url):
     processor = ArticleProcessor()
     article_data = processor.fetch_article(url)
 
-    if article_data:
-        return render_template('article.html', article=article_data)
-    else:
-        return jsonify({'error': 'Failed to fetch article'}), 404
+    if article_data.get('error'):
+        # Render error template instead of returning JSON
+        return render_template(
+            'article_error.html',
+            error_message=article_data.get('message'),
+            url=article_data.get('url')
+        )
+
+    return render_template('article.html', article=article_data)
 
 
 if __name__ == "__main__":
