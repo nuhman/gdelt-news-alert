@@ -10,6 +10,12 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
     />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap"
+      rel="stylesheet"
+    />
     <style>
       :root {
         --primary-bg: #f8f9fa;
@@ -21,7 +27,9 @@
 
       body {
         background-color: var(--primary-bg);
-        font-family: "Inter", system-ui, -apple-system, sans-serif;
+        font-family: "Nunito", serif;
+        font-optical-sizing: auto;
+        font-style: normal;
         color: #1a1a1a;
         line-height: 1.6;
       }
@@ -215,7 +223,7 @@
     <div class="container-fluid px-4">
       <nav class="navbar sticky-top mb-4">
         <div class="container-fluid">
-          <h1 class="navbar-brand mb-0 h1 fs-2">GDELT News</h1>
+          <h1 class="navbar-brand mb-0 h1 fs-2">GlobalAlert</h1>
           <div class="d-flex align-items-center">
             <small id="last-updated" class="me-3"></small>
             <button id="refresh-btn" class="btn">
