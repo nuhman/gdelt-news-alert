@@ -126,7 +126,6 @@ class ArticleProcessor:
 
     def get_summary(self, text, sentences_count=5):
         try:
-            print(text)
             # Check if text is empty or too short
             if not text or len(text.split()) < 10:
                 return "Text is too short to summarize."
@@ -185,9 +184,7 @@ def fetch_data_for_category(category):
             if not articles_df.empty:
                 # Add category column to the DataFrame
                 articles_df['category'] = category
-
-                print(f"Completed batch processing successfully for {
-                      category}: {batch_keywords}")
+                
                 all_results.append(articles_df)
                 global SUCCESS_PASS
                 SUCCESS_PASS += 1
